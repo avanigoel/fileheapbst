@@ -4,7 +4,7 @@
 
 char* itoa(int num, char* str, int base);
 
-struct node* S[20];
+struct node* S[2000];
 int top = -1;
 
 struct node
@@ -66,7 +66,7 @@ void appendToFile(FILE *fp, int val)
     int size = getSize(fp);
     fseek(fp,8*(size)+7,SEEK_SET);
     fprintf(fp,"%8d",val);
-    updateSize(fp,getSize(fp)+1);
+    updateSize(fp,size+1);
 }
 
 void setValueAt(FILE *fp, int index, int value)
@@ -279,27 +279,32 @@ void heapify_root(FILE* fp)
 int hdelmin(FILE* fp)
 {
     int no,size,last;
-    fseek(fp,0,SEEK_SET);
-    fscanf(fp,"%7d",&size);
+    //fseek(fp,0,SEEK_SET);
+    //fscanf(fp,"%7d",&size);
+    size = getSize(fp);
     if(size==0)
     {
         printf("\nEmpty file!!\n");
         return -1;
     }
-    fseek(fp,8,SEEK_SET);
-    fscanf(fp,"%7d",&no);
+    //fseek(fp,8,SEEK_SET);
+    //fscanf(fp,"%7d",&no);
+    no = getValueAt(fp, 1);
 
     printf("removing %d\n",no);
 
-    fseek(fp,8*size,SEEK_SET);
+    //fseek(fp,8*size,SEEK_SET);
     /*fseek(fp,-7,SEEK_END);*/
-    fscanf(fp,"%7d",&last);
+    //fscanf(fp,"%7d",&last);
+    last = getValueAt(fp,size);
+    removeLast(fp);
     
-    fseek(fp,7,SEEK_SET);
-    fprintf(fp,"%8d",last);
+   /* fseek(fp,7,SEEK_SET);
+    fprintf(fp,"%8d",last);*/
     
-    fseek(fp,0,SEEK_SET);
-    fprintf(fp,"%7d",size-1);
+    setValueAt(fp, 1, last);
+    /*fseek(fp,0,SEEK_SET);
+    fprintf(fp,"%7d",size-1);*/
     
     fseek(fp,0,SEEK_SET);
     heapify_root(fp);
@@ -386,7 +391,7 @@ void dbsearch(struct node* root,int data)
 }
 void push(struct node* x)
 {
-    if(top>19)
+    if(top>2000)
     {
         printf("Stack Overflow!!");
         
@@ -707,13 +712,14 @@ void main()
     //nins = 14;
     //int data[14] = {11, 19, 21, 36, 43, 41, 45, 47, 60, 64, 71, 89, 75, 37};
     printf("Insert keys:\n");
-
+    //int data[200];
     for(i=0;i < nins;i++)
     {
         scanf("%d",&num);
-        //dbinsert(root,data[i]);
         dbinsert(root,num);
+        //dbinsert(root,i);
     }
+   
 
     printf("\nInorder listing of min and max values of leaves\n");
     inorder(root);
