@@ -16,7 +16,7 @@ struct node
     FILE* fp;
 };
 
-int L = 4;
+int L = 32;
 int n = 0;
 FILE* hinit()
 {
