@@ -14,6 +14,7 @@ struct node
     int max;
     struct node* rc;
     FILE* fp;
+    char name[50];
 };
 
 int L = 32;
@@ -71,14 +72,15 @@ void appendToFile(FILE *fp, int val)
 
 void setValueAt(FILE *fp, int index, int value)
 {
-     printf("Value is %d",value);
-     printf("Index is %d",index);
+    //first element means index 1
+     
      fseek(fp,8*index,SEEK_SET);
      fprintf(fp,"%7d",value);
 }
 
 int getValueAt(FILE *fp, int index)
 {
+    //first element means index 1
     int val;
     fseek(fp,8*(index),SEEK_SET);
     fscanf(fp,"%7d",&val);
@@ -102,7 +104,7 @@ int hsearch(FILE* fp,int data)
             no = getValueAt(fp, i);
             if(data == no)
             {
-                printf("\n%d Data found!!\n",data);
+                printf("\nPRESENT\n",data);
                 return 1;
             }
             
@@ -110,7 +112,6 @@ int hsearch(FILE* fp,int data)
         
         if(i == size+2)
         {
-            printf("\n%d Data not found!!\n",data);
             return 0;
         }
         
@@ -122,71 +123,40 @@ void heapify_bottom(FILE* fp)
 {
     int size,parent,current,t;
     fscanf(fp,"%7d",&size);
-    printf("\nSize is %d\n",size );
+   
     while(size/2 >= 1)
     {
-        
-        //fseek(fp,(size)*8,SEEK_SET);
-        //fscanf(fp,"%7d",&current);
         current = getValueAt(fp,size);
-        printf("\nCurrent is %d\n",current);
-        //fseek(fp,(size/2)*8,SEEK_SET);
-        //fscanf(fp,"%7d",&parent);
+                
         parent = getValueAt(fp,size/2);
-        printf("\nParent is %d\n",parent);
-        
+                
         if(current < parent)
         {
-            /*t = current;
-             current = parent;
-             parent = t;*/
             
-            //printf("size is %d\n",size);
             fseek(fp,(size)*8,SEEK_SET);
             fprintf(fp,"%7d",parent);
-            //setValueAt(fp, size, parent);
-            //printf("%d\n",current);
-            //setValueAt(fp, size/2, current);
-
-        fseek(fp,(size/2)*8,SEEK_SET);
+            
+            fseek(fp,(size/2)*8,SEEK_SET);
             fprintf(fp,"%7d",current);
-
-
-        printf("size/2 is %d",size/2);
-
+            
         }
         
-        /*printf("\nAfter swapping\n");
-         printf("\nCurrent is %d\n",current);
-         printf("\nParent is %d\n",parent);
-         
-         printf("sizev is %d\n",size);
-         fseek(fp,(size-1)*8+7,SEEK_SET);
-         fprintf(fp,"%8d",current);
-         printf("%d\n",current);
-         
-         fseek(fp,7+((size/2)-1)*8,SEEK_SET);
-         fprintf(fp,"%8d",parent);*/
-        
+               
         size = size/2;
         
     }
-    
-    
+        
 }
 
 
 void hinsert(FILE* fp,int data)
 {
     
-
     appendToFile(fp, data);
 
     fseek(fp,0,SEEK_SET);
     heapify_bottom(fp);
-    
-    
-    
+            
 }
 
 
@@ -217,29 +187,19 @@ void heapify_root(FILE* fp)
         fseek(fp,8+(i)*8,SEEK_SET);
         fscanf(fp,"%7d",&parent);
 
-        //parent = getValueAt(fp,i);
-
         fseek(fp,8+((2*i)+1)*8,SEEK_SET);
         fscanf(fp,"%7d",&left);
-        //left = getValueAt(fp,(2*i)+1);
-
-        printf("parent is %d\n",parent);
-        printf("left is %d\n",left);
-        
+                   
 
         if(2*i+2 < size)
         {
             fseek(fp,8+((2*i)+2)*8,SEEK_SET);
             fscanf(fp,"%7d",&right);
+                                   
             
-            //right = getValueAt(fp,(2*i)+2);
-            
-            printf("right is %d\n",right);
-
-
             if(left < parent && left < right)
             {
-                printf("left smallest %d",left);
+                
                 fseek(fp,8+(i)*8,SEEK_SET);
 
                 fprintf(fp,"%7d",left);
@@ -248,7 +208,7 @@ void heapify_root(FILE* fp)
             }
             else if(right < parent && right < left)
             {
-                printf("right smallest %d",right);
+                
                 fseek(fp,8+(i)*8,SEEK_SET);
                 fprintf(fp,"%7d",right);
                 fseek(fp,8+((2*i)+2)*8,SEEK_SET);
@@ -259,17 +219,14 @@ void heapify_root(FILE* fp)
         {
             if(left < parent)
             {
-                printf("left smallest %d",left);
+                
                 fseek(fp,8+(i)*8,SEEK_SET);
                 fprintf(fp,"%7d",left);
                 fseek(fp,8+((2*i)+1)*8,SEEK_SET);
                 fprintf(fp,"%7d",parent);
             }
         }
-        
-        
-
-        
+                        
         i++;
     }
     
@@ -279,33 +236,22 @@ void heapify_root(FILE* fp)
 int hdelmin(FILE* fp)
 {
     int no,size,last;
-    //fseek(fp,0,SEEK_SET);
-    //fscanf(fp,"%7d",&size);
+    
     size = getSize(fp);
     if(size==0)
     {
         printf("\nEmpty file!!\n");
         return -1;
     }
-    //fseek(fp,8,SEEK_SET);
-    //fscanf(fp,"%7d",&no);
+    
     no = getValueAt(fp, 1);
 
-    printf("removing %d\n",no);
-
-    //fseek(fp,8*size,SEEK_SET);
-    /*fseek(fp,-7,SEEK_END);*/
-    //fscanf(fp,"%7d",&last);
+    
     last = getValueAt(fp,size);
     removeLast(fp);
     
-   /* fseek(fp,7,SEEK_SET);
-    fprintf(fp,"%8d",last);*/
-    
     setValueAt(fp, 1, last);
-    /*fseek(fp,0,SEEK_SET);
-    fprintf(fp,"%7d",size-1);*/
-    
+        
     fseek(fp,0,SEEK_SET);
     heapify_root(fp);
     return no;
@@ -339,6 +285,9 @@ int hfindmax(FILE* fp)
 
 struct node* dbinit()
 {
+    char buff[100];
+    itoa(n,buff,10);
+    strcat(buff,".txt");
     struct node* new;
     new = (struct node*)malloc(sizeof(struct node));
     new->lc=NULL;
@@ -346,7 +295,9 @@ struct node* dbinit()
     new->min=-1;
     new->max=-1;
     new->fp=hinit();
-
+    
+    *(new->name) = *buff;
+    
     return new;
 }
 
@@ -358,8 +309,8 @@ void dbsearch(struct node* root,int data)
     {
         if(data < cur->min || data > cur->max)
         {
-            printf("Data not present\n");
-            break;
+            printf("ABSENT\n");
+            return;
         }
         else
         {
@@ -379,8 +330,8 @@ void dbsearch(struct node* root,int data)
             }
             else if(data > Lmax && data < Rmin)
             {
-                printf("Data not present\n");
-                break;
+                printf("ABSENT\n");
+                return;
             }
         }
         
@@ -430,8 +381,8 @@ void dbinsert(struct node* root,int data)
     struct node* right;
     int Lmax,size,i,no;
     int max=0;
-    //Lmax = cur->lc->max;
-    printf("cyvs\n");
+    
+   
     while(cur->lc!=NULL && cur->rc!=NULL)
     {
         Lmax = cur->lc->max;
@@ -455,13 +406,13 @@ void dbinsert(struct node* root,int data)
     {
         fseek(cur->fp,0,SEEK_SET);
         fscanf(cur->fp,"%7d",&size);
-        //fseek(cur->fp,1,SEEK_CUR);
+        
         if(size < L)
         {
-            printf("fiikn");
+            
             fseek(cur->fp,0,SEEK_SET);
             hinsert(cur->fp,data);
-            printf("ffgfg");
+           
             fseek(cur->fp,0,SEEK_SET);
             cur->min = hfindmin(cur->fp);
             cur->max = hfindmax(cur->fp);
@@ -480,12 +431,12 @@ void dbinsert(struct node* root,int data)
             {
                
                 fseek(cur->fp,0,SEEK_SET);
-                printf("ddss");
+                
                 no=hdelmin(cur->fp);
-                printf("ttrt");
+                
                 fseek(f2,0,SEEK_SET);
                 hinsert(f2,no);
-                printf("sdd\n");
+                
                 if(no > max)
                 {
                     max = no;
@@ -496,22 +447,14 @@ void dbinsert(struct node* root,int data)
             {
                 fseek(cur->fp,0,SEEK_SET);
                 hinsert(cur->fp,data);
-                /*popped=pop();
-                fseek(cur->fp,0,SEEK_SET);
-                popped->min = hfindmin(cur->fp);
-                fseek(cur->fp,0,SEEK_SET);
-                popped->max = hfindmax(cur->fp);*/
+                
         
             }
             else if(data < max)
             {
                 fseek(f2,0,SEEK_SET);
                 hinsert(f2,data);
-               /* popped=pop();
-                fseek(f2,0,SEEK_SET);
-                popped->min = hfindmin(f2);
-                fseek(f2,0,SEEK_SET);
-                popped->max = hfindmax(f2);*/
+               
             }
 
             left->min = hfindmin(f2);
@@ -531,7 +474,7 @@ void dbinsert(struct node* root,int data)
                 popped->max = popped->rc->max;
 
             }
-            //update(root,data);
+            
         }
     }
     
@@ -566,8 +509,7 @@ void listing(struct node* root)
             printf("%d\t",hfindmin(root->fp));
             printf("%d\t",hfindmax(root->fp));
         }
-        /*printf("%d\t",hfindmin(root->fp));
-        printf("%d\t",hfindmax(root->fp));*/
+       
         if(root->lc!=NULL)
         {
             listing(root->rc);
@@ -583,7 +525,7 @@ void preorder(struct node* root)
 {
     if(root!=NULL)
     {
-        //printf("%d\t",root->min);
+       
         preorder(root->lc);
         printf("%d\t",root->min);
         preorder(root->rc);
@@ -648,60 +590,34 @@ int nodes(struct node* root)
 
      }
 }
-void statistics(struct node* root)
+
+void print_BST(struct node* root)
 {
-    int c=0,h,l=0;
-    //h = height(root);
-    //printf("Height is %d\n",h);
+    char buff[100];
+    itoa(n,buff,10);
+    strcat(buff,".txt");
     if(root)
     {
-        if(root->lc == NULL && root->rc == NULL)
+        printf("Range = [%d %d], ",root->min,root->max);
+        printf("File = ");
+        if(root->fp == NULL)
         {
-            l++;
-            c++;
+            printf("None\n");
         }
         else
         {
-            c++;
+            printf("%s\n",root->name);
         }
-        statistics( root->lc);
-        statistics( root->rc);
 
+        print_BST(root->lc);
+        print_BST(root->rc);
     }
-
-    
-    printf("Nodes is %d\n",c);
-    printf("Leaves is %d\n",l);
-
 }
 
-void main()
-{
-    /*FILE* f1;
-    FILE* f2;
-    f1=hinit();
-    f2=hinit();
-    hinsert(f1,90);
-    hinsert(f1,78);
-    hinsert(f1,45);
-    hinsert(f1,23);
-    //heapify_bottom(f1);
-    hinsert(f2,80);
-    hinsert(f2,70);
-    hinsert(f2,67);
-    hinsert(f2,57);
-    hinsert(f2,43);
-    hsearch(f1,78);
-    hsearch(f2,80);
-    hsearch(f2,70);
-    hsearch(f2,57);
-    printf("\nmin1 is %d",hfindmin(f1));
-    printf("\nmin2 is %d",hfindmin(f2));
-    printf("\nDeleted1 is %d",hdelmin(f1));
-    printf("\nDeleted2 is %d",hdelmin(f2));
-    printf("\nMax1 is %d",hfindmax(f1));
-    printf("\nMax1 is %d",hfindmax(f2));*/
 
+int main()
+{
+    
     struct node* root;
     int nins,num,i,n1,n2;
     root = dbinit();
@@ -709,34 +625,37 @@ void main()
     printf("\nEnter the no. of instructions\n");
     
     scanf("%d",&nins);
-    //nins = 14;
-    //int data[14] = {11, 19, 21, 36, 43, 41, 45, 47, 60, 64, 71, 89, 75, 37};
+    
     printf("Insert keys:\n");
-    //int data[200];
+    
     for(i=0;i < nins;i++)
     {
         scanf("%d",&num);
         dbinsert(root,num);
-        //dbinsert(root,i);
+        
     }
    
 
-    printf("\nInorder listing of min and max values of leaves\n");
+    printf("\n+++Inorder listing of min and max values of leaves\n");
     inorder(root);
 
-    printf("\n Inorder listing of min and max values read from files\n");
+    printf("\n+++Inorder listing of min and max values read from files\n");
     listing(root);
 
-    printf("\nSorted listing of min values at all nodes\n");
+    printf("\n+++Sorted listing of min values at all nodes\n");
     preorder(root);
 
-    printf("\nSorted listing of max values at all nodes\n");
+    printf("\n+++Sorted listing of max values at all nodes\n");
     postorder(root);
 
-    printf("\nStatistics of the BST\n");
-    printf("The no of leaves are %d\n",leaves(root));
-    printf("The no of nodes are %d\n",nodes(root));
-    printf("The height is %d\n",height(root));
+    printf("\n+++Statistics of the BST\n");
+
+    printf("Number of nodes  = %d\n",nodes(root));
+    printf("Number of leaves = %d\n",leaves(root));
+    printf("Height           = %d\n",height(root));
+
+    printf("\n+++ The BST\n");
+    print_BST(root);
 
     printf("\nInput key: ");
     scanf("%d",&n1);
